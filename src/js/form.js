@@ -1,28 +1,44 @@
+const URL = 'https://hn.algolia.com/api/v1/search';
+
+const getItemTemplate = ({title, url, objectID}) =>
+    `<li class="news-item" data-id=${objectID}>
+        <a href=${url} target ="_blank">${title}</a>
+      </li>`;
 const refs = {
-    startButton: document.querySelector('[data-start]'),
-    stopButton: document.querySelector('[data-stop]'),
-    body: document.querySelector('body'),
-}
+    form: document.querySelector('.news-form'),
+    list: document.querySelector('.news-list'),
+    submitButton: document.querySelector('button[type ="submit"]'),
+    loader: document.querySelector('.news-loading'),
+};
 
-let bodyColor = null;
+let isLoading = false;
 
-refs.stopButton.disabled = true;
+let newsItems = [];
+const render = () => {
+    const newsList = newsItems.map(getItemTemplate);
+    refs.list.innerHTML = '';
+    refs.list.insertAdjacentHTML('beforeend', newsList.join(''));
+};
 
-refs.startButton.addEventListener('click', () => {
-        bodyColor = setInterval(bodyColorChange, 1000);
-        refs.startButton.disabled = true;
-        refs.stopButton.disabled = false;
-});
+const showLoader = () => {
+    refs.loader.classList.add('show');
+};
 
-refs.stopButton.addEventListener('click', () => {
-    clearInterval(bodyColor);
-    refs.startButton.disabled = false;
-    refs.stopButton.disabled = true;
-});
+const hideLoader = () => {
+    refs.loader.classList.remove('show');
+};
 
-function bodyColorChange() {
-    refs.body.style.backgroundColor = getRandomHexColor();
-}
-function getRandomHexColor() {
-  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-}
+const onFormSubmit = (e) => {
+    const {value} = e.target.elements.query;
+    e.preventDefault();
+    showLoader();
+    fetch(`${URL}?query=${value}`)
+        .then(response => response.json())
+        .then(({ hits }) => {
+            newsItems = hits;
+            render();
+        })
+        .finally(hideLoader());
+};
+
+refs.form.addEventListener('submit', onFormSubmit);
