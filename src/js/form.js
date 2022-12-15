@@ -28,17 +28,29 @@ const hideLoader = () => {
     refs.loader.classList.remove('show');
 };
 
+const lockButton = () => {
+    refs.submitButton.disabled = true;
+}
+
+const unlockButton = () => {
+    refs.submitButton.disabled = false;
+}
+
 const onFormSubmit = (e) => {
     const {value} = e.target.elements.query;
     e.preventDefault();
     showLoader();
+    lockButton();
     fetch(`${URL}?query=${value}`)
         .then(response => response.json())
         .then(({ hits }) => {
             newsItems = hits;
             render();
         })
-        .finally(hideLoader());
+        .finally(() => {
+            hideLoader();
+            unlockButton();
+        });
 };
 
 refs.form.addEventListener('submit', onFormSubmit);
