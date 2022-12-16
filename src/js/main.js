@@ -36,7 +36,7 @@ const unlockButton = () => {
     refs.submitButton.disabled = false;
 }
 
-lockButton();
+
 const onFormSubmit = (e) => {
     const {value} = e.target.elements.query;
     e.preventDefault();
